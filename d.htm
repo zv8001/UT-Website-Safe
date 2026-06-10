@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Code Diff Viewer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Consolas, "Courier New", monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+
+        header {
+            padding: 16px 20px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #f0f6fc;
+        }
+
+        .Controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #f0f6fc;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background: #30363d;
+        }
+
+        .MainGrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .EditorPanel {
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #161b22;
+        }
+
+        .PanelTitle {
+            padding: 10px 12px;
+            border-bottom: 1px solid #30363d;
+            color: #f0f6fc;
+            background: #0d1117;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            height: 280px;
+            resize: vertical;
+            border: 0;
+            outline: 0;
+            padding: 12px;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 14px;
+            line-height: 1.45;
+            tab-size: 4;
+        }
+
+        .DiffContainer {
+            margin: 0 12px 12px;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #0d1117;
+        }
+
+        .DiffHeader {
+            padding: 10px 12px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            color: #f0f6fc;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .DiffTable {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 14px;
+        }
+
+        .DiffTable td {
+            vertical-align: top;
+            white-space: pre-wrap;
+            word-break: break-word;
+            padding: 2px 8px;
+            line-height: 1.45;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.35);
+        }
+
+        .LineNumber {
+            width: 54px;
+            color: #7d8590;
+            text-align: right;
+            user-select: none;
+            background: #161b22;
+            border-right: 1px solid #30363d;
+        }
+
+        .LineCode {
+            width: calc(50% - 54px);
+        }
+
+        .Added {
+            background: rgba(46, 160, 67, 0.22);
+        }
+
+        .Removed {
+            background: rgba(248, 81, 73, 0.22);
+        }
+
+        .ChangedOld {
+            background: rgba(248, 81, 73, 0.18);
+        }
+
+        .ChangedNew {
+            background: rgba(46, 160, 67, 0.18);
+        }
+
+        .EmptyLine {
+            background: rgba(48, 54, 61, 0.22);
+        }
+
+        .InlineAdded {
+            background: rgba(46, 160, 67, 0.45);
+            border-radius: 3px;
+        }
+
+        .InlineRemoved {
+            background: rgba(248, 81, 73, 0.45);
+            border-radius: 3px;
+        }
+
+        .Stats {
+            color: #8b949e;
+            font-weight: normal;
+        }
+
+        @media (max-width: 900px) {
+            .MainGrid {
+                grid-template-columns: 1fr;
+            }
+
+            .DiffTable {
+                font-size: 12px;
+            }
+
+            .LineNumber {
+                width: 38px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dark Mode Code Diff Viewer</h1>
+        <div class="Controls">
+            <button onclick="GenerateDiff()">Generate Diff</button>
+            <button onclick="ClearAll()">Clear</button>
+            <button onclick="LoadExample()">Load Example</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="MainGrid">
+            <div class="EditorPanel">
+                <div class="PanelTitle">Old Version</div>
+                <textarea id="OldText" spellcheck="false" placeholder="Paste the old code here..."></textarea>
+            </div>
+
+            <div class="EditorPanel">
+                <div class="PanelTitle">New Version</div>
+                <textarea id="NewText" spellcheck="false" placeholder="Paste the new code here..."></textarea>
+            </div>
+        </section>
+
+        <section class="DiffContainer">
+            <div class="DiffHeader">
+                <span>Diff Output</span>
+                <span class="Stats" id="StatsText">No diff generated yet.</span>
+            </div>
+            <table class="DiffTable">
+                <tbody id="DiffOutput"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        function EscapeHtml(Value) {
+            return Value
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function SplitLines(Value) {
+            return Value.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+        }
+
+        function CalculateLcs(OldLines, NewLines) {
+            const OldLength = OldLines.length;
+            const NewLength = NewLines.length;
+            const Matrix = Array.from({ length: OldLength + 1 }, () => Array(NewLength + 1).fill(0));
+
+            for (let OldIndex = OldLength - 1; OldIndex >= 0; OldIndex--) {
+                for (let NewIndex = NewLength - 1; NewIndex >= 0; NewIndex--) {
+                    if (OldLines[OldIndex] === NewLines[NewIndex]) {
+                        Matrix[OldIndex][NewIndex] = Matrix[OldIndex + 1][NewIndex + 1] + 1;
+                    } else {
+                        Matrix[OldIndex][NewIndex] = Math.max(Matrix[OldIndex + 1][NewIndex], Matrix[OldIndex][NewIndex + 1]);
+                    }
+                }
+            }
+
+            return Matrix;
+        }
+
+        function BuildDiff(OldLines, NewLines) {
+            const Matrix = CalculateLcs(OldLines, NewLines);
+            const Rows = [];
+            let OldIndex = 0;
+            let NewIndex = 0;
+
+            while (OldIndex < OldLines.length || NewIndex < NewLines.length) {
+                if (OldIndex < OldLines.length && NewIndex < NewLines.length && OldLines[OldIndex] === NewLines[NewIndex]) {
+                    Rows.push({ Type: "Same", OldLine: OldIndex + 1, NewLine: NewIndex + 1, OldText: OldLines[OldIndex], NewText: NewLines[NewIndex] });
+                    OldIndex++;
+                    NewIndex++;
+                } else if (NewIndex < NewLines.length && (OldIndex === OldLines.length || Matrix[OldIndex][NewIndex + 1] >= Matrix[OldIndex + 1][NewIndex])) {
+                    Rows.push({ Type: "Added", OldLine: "", NewLine: NewIndex + 1, OldText: "", NewText: NewLines[NewIndex] });
+                    NewIndex++;
+                } else if (OldIndex < OldLines.length) {
+                    Rows.push({ Type: "Removed", OldLine: OldIndex + 1, NewLine: "", OldText: OldLines[OldIndex], NewText: "" });
+                    OldIndex++;
+                }
+            }
+
+            return PairChangedRows(Rows);
+        }
+
+        function PairChangedRows(Rows) {
+            const PairedRows = [];
+
+            for (let Index = 0; Index < Rows.length; Index++) {
+                const CurrentRow = Rows[Index];
+                const NextRow = Rows[Index + 1];
+
+                if (CurrentRow.Type === "Removed" && NextRow && NextRow.Type === "Added") {
+                    PairedRows.push({
+                        Type: "Changed",
+                        OldLine: CurrentRow.OldLine,
+                        NewLine: NextRow.NewLine,
+                        OldText: CurrentRow.OldText,
+                        NewText: NextRow.NewText
+                    });
+                    Index++;
+                } else {
+                    PairedRows.push(CurrentRow);
+                }
+            }
+
+            return PairedRows;
+        }
+
+        function GetInlineDiff(OldText, NewText) {
+            let Start = 0;
+            let OldEnd = OldText.length - 1;
+            let NewEnd = NewText.length - 1;
+
+            while (Start <= OldEnd && Start <= NewEnd && OldText[Start] === NewText[Start]) {
+                Start++;
+            }
+
+            while (OldEnd >= Start && NewEnd >= Start && OldText[OldEnd] === NewText[NewEnd]) {
+                OldEnd--;
+                NewEnd--;
+            }
+
+            const OldPrefix = EscapeHtml(OldText.slice(0, Start));
+            const NewPrefix = EscapeHtml(NewText.slice(0, Start));
+            const OldMiddle = EscapeHtml(OldText.slice(Start, OldEnd + 1));
+            const NewMiddle = EscapeHtml(NewText.slice(Start, NewEnd + 1));
+            const OldSuffix = EscapeHtml(OldText.slice(OldEnd + 1));
+            const NewSuffix = EscapeHtml(NewText.slice(NewEnd + 1));
+
+            return {
+                OldHtml: OldPrefix + `<span class="InlineRemoved">${OldMiddle}</span>` + OldSuffix,
+                NewHtml: NewPrefix + `<span class="InlineAdded">${NewMiddle}</span>` + NewSuffix
+            };
+        }
+
+        function AddRow(OutputElement, Row) {
+            const TableRow = document.createElement("tr");
+            const OldNumber = document.createElement("td");
+            const OldCode = document.createElement("td");
+            const NewNumber = document.createElement("td");
+            const NewCode = document.createElement("td");
+
+            OldNumber.className = "LineNumber";
+            NewNumber.className = "LineNumber";
+            OldCode.className = "LineCode";
+            NewCode.className = "LineCode";
+
+            OldNumber.textContent = Row.OldLine;
+            NewNumber.textContent = Row.NewLine;
+
+            if (Row.Type === "Added") {
+                OldCode.classList.add("EmptyLine");
+                NewCode.classList.add("Added");
+                NewCode.textContent = "+ " + Row.NewText;
+            } else if (Row.Type === "Removed") {
+                OldCode.classList.add("Removed");
+                NewCode.classList.add("EmptyLine");
+                OldCode.textContent = "- " + Row.OldText;
+            } else if (Row.Type === "Changed") {
+                const InlineResult = GetInlineDiff(Row.OldText, Row.NewText);
+                OldCode.classList.add("ChangedOld");
+                NewCode.classList.add("ChangedNew");
+                OldCode.innerHTML = "- " + InlineResult.OldHtml;
+                NewCode.innerHTML = "+ " + InlineResult.NewHtml;
+            } else {
+                OldCode.textContent = "  " + Row.OldText;
+                NewCode.textContent = "  " + Row.NewText;
+            }
+
+            TableRow.appendChild(OldNumber);
+            TableRow.appendChild(OldCode);
+            TableRow.appendChild(NewNumber);
+            TableRow.appendChild(NewCode);
+            OutputElement.appendChild(TableRow);
+        }
+
+        function GenerateDiff() {
+            const OldValue = document.getElementById("OldText").value;
+            const NewValue = document.getElementById("NewText").value;
+            const OldLines = SplitLines(OldValue);
+            const NewLines = SplitLines(NewValue);
+            const DiffRows = BuildDiff(OldLines, NewLines);
+            const OutputElement = document.getElementById("DiffOutput");
+            const StatsText = document.getElementById("StatsText");
+
+            OutputElement.innerHTML = "";
+
+            let AddedCount = 0;
+            let RemovedCount = 0;
+            let ChangedCount = 0;
+
+            for (const Row of DiffRows) {
+                if (Row.Type === "Added") AddedCount++;
+                if (Row.Type === "Removed") RemovedCount++;
+                if (Row.Type === "Changed") ChangedCount++;
+                AddRow(OutputElement, Row);
+            }
+
+            StatsText.textContent = `+${AddedCount} added, -${RemovedCount} removed, ${ChangedCount} changed`;
+        }
+
+        function ClearAll() {
+            document.getElementById("OldText").value = "";
+            document.getElementById("NewText").value = "";
+            document.getElementById("DiffOutput").innerHTML = "";
+            document.getElementById("StatsText").textContent = "No diff generated yet.";
+        }
+
+        function LoadExample() {
+            document.getElementById("OldText").value = `local ForceEvent = workspace.ForceMusic\nlocal Volume = 1\n\nif ForceEvent then\n    print("Playing music")\nend`;
+
+            document.getElementById("NewText").value = `local ForceEvent = workspace.ForceMusic\nlocal Volume = 1.5\nlocal DebugMode = false\n\nif ForceEvent and not DebugMode then\n    print("Playing updated music")\nend`;
+
+            GenerateDiff();
+        }
+    </script>
+</body>
+</html>

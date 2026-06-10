@@ -1,0 +1,102 @@
+
+header.navbar { height: 60px !important; }
+
+
+.archive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Reminder: copy to add a new archive entry!!!! -vex */
+.archive-entry {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.archive-entry:hover {
+  border-color: var(--border-h);
+  box-shadow: 0 4px 24px rgba(59,130,246,0.08);
+}
+
+.archive-entry-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.archive-entry-icon svg { width: 18px; height: 18px; stroke: #93c5fd; }
+
+.archive-entry-body { flex: 1; min-width: 0; }
+
+.archive-entry-title {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.archive-entry-desc {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+}
+
+
+.allegations-header {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.allegations-label {
+  font-family: var(--font-head);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  border-left: 3px solid #ef4444;
+  padding-left: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.allegations-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #fca5a5;
+}
+
+.allegations-warning svg { width: 14px; height: 14px; stroke: #f87171; flex-shrink: 0; }
+
+/* Reminder: copy to add a new archive(allegation) entry!!!! -vex */
+.archive-entry.allegation {
+  border-color: rgba(239,68,68,0.35);
+  background: rgba(239,68,68,0.04);
+}
+
+.archive-entry.allegation:hover {
+  border-color: rgba(239,68,68,0.6);
+  box-shadow: 0 4px 24px rgba(239,68,68,0.1);
+}
+
+.archive-entry.allegation .archive-entry-icon {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.25);
+}
+
+.archive-entry.allegation .archive-entry-icon svg { stroke: #fca5a5; }

@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Rich Text Editor — Unknown Technologies+</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e12;
+    --surface: #16161c;
+    --surface2: #1e1e27;
+    --surface3: #26262f;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --accent: #e8475f;
+    --accent2: #ff6b7a;
+    --blue: #5b8dee;
+    --teal: #3dd9c7;
+    --amber: #f5a623;
+    --green: #4caf82;
+    --purple: #9b72cf;
+    --text: #f0f0f5;
+    --text2: #9090a8;
+    --text3: #5a5a72;
+    --font-ui: 'Syne', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 8px;
+    --radius-lg: 14px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .logo-sub {
+    font-weight: 400;
+    color: var(--text3);
+    font-size: 13px;
+    margin-left: 4px;
+  }
+
+  .top-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn:hover { background: var(--surface3); color: var(--text); border-color: var(--border2); }
+
+  .btn-accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .btn-accent:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .pane {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    min-height: calc(100vh - 57px);
+  }
+
+  .pane:last-child { border-right: none; }
+
+  .pane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .pane-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .toolbar-group {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+
+  .toolbar-sep {
+    width: 1px;
+    height: 22px;
+    background: var(--border2);
+    margin: 0 4px;
+  }
+
+  .tb-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.12s;
+    position: relative;
+  }
+
+  .tb-btn:hover { background: var(--surface3); color: var(--text); }
+  .tb-btn.active { background: var(--accent); color: #fff; }
+
+  .tb-btn[data-format="b"] { font-weight: 800; }
+  .tb-btn[data-format="i"] { font-style: italic; font-size: 14px; }
+  .tb-btn[data-format="u"] { text-decoration: underline; font-size: 13px; }
+  .tb-btn[data-format="s"] { text-decoration: line-through; font-size: 13px; }
+  .tb-btn[data-format="sc"] { font-size: 9px; letter-spacing: 1px; }
+
+  .color-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border2);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 0;
+    overflow: hidden;
+    transition: border-color 0.12s;
+    position: relative;
+  }
+
+  .color-btn:hover { border-color: var(--text2); }
+
+  .color-swatch {
+    width: 16px; height: 16px;
+    border-radius: 3px;
+    display: block;
+  }
+
+  .font-size-select, .font-face-select {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 6px;
+    padding: 0 8px;
+    height: 30px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.12s;
+  }
+
+  .font-size-select:hover, .font-face-select:hover {
+    border-color: var(--border2);
+    color: var(--text);
+  }
+
+  .editor-area {
+    flex: 1;
+    padding: 24px;
+    outline: none;
+    font-size: 16px;
+    line-height: 1.7;
+    caret-color: var(--accent);
+    overflow-y: auto;
+    background: var(--bg);
+    min-height: 200px;
+    font-family: Arial, sans-serif;
+  }
+
+  .editor-area:empty::before {
+    content: 'Start typing your rich text here…';
+    color: var(--text3);
+    pointer-events: none;
+  }
+
+  .preview-pane {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  .preview-inner {
+    padding: 24px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .preview-roblox {
+    background: #1a1a2e;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    font-family: 'Builder Sans', 'Arial', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #fff;
+    word-break: break-word;
+    min-height: 60px;
+    position: relative;
+  }
+
+  .preview-roblox::before {
+    content: 'ROBLOX';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 9px;
+    font-family: var(--font-ui);
+    font-weight: 800;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: 2px;
+  }
+
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .code-block-lang {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .code-content {
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #c9d1d9;
+    word-break: break-all;
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .copy-btn {
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.12s;
+  }
+
+  .copy-btn:hover { background: var(--surface3); color: var(--text); }
+  .copy-btn.copied { color: var(--teal); border-color: var(--teal); }
+
+  .cp-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 998;
+  }
+
+  .cp-overlay.open { display: block; }
+
+  .color-picker-popup {
+    position: fixed;
+    z-index: 999;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+    display: none;
+    width: 292px;
+    user-select: none;
+  }
+
+  .color-picker-popup.open { display: block; }
+
+  .color-picker-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .cp-sv-wrap {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: crosshair;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+  }
+
+  #cpSvCanvas { display: block; width: 100%; height: 100%; }
+
+  .cp-sv-cursor {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    top: 0; left: 0;
+  }
+
+  .cp-hue-wrap {
+    position: relative;
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    margin-bottom: 10px;
+    background: linear-gradient(to right,
+      #ff0000,#ffff00,#00ff00,#00ffff,#0000ff,#ff00ff,#ff0000);
+  }
+
+  .cp-hue-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+    pointer-events: none;
+    left: 0;
+  }
+
+  .cp-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .cp-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .cp-input-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .cp-input {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 5px;
+    padding: 4px 4px;
+    outline: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .cp-input:focus { border-color: var(--border2); }
+
+  .cp-c3-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .cp-c3-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .cp-c3-input {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 5px;
+    padding: 4px 6px;
+    outline: none;
+  }
+
+  .cp-c3-input:focus { border-color: var(--border2); }
+
+  .cp-bottom {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .cp-preview {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border2);
+    flex-shrink: 0;
+  }
+
+  .cp-hex-input {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 5px;
+    padding: 5px 8px;
+    outline: none;
+  }
+
+  .cp-hex-input:focus { border-color: var(--border2); }
+
+  .cp-ok-btn {
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 22px);
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .color-chip {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    border-radius: 4px;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.1s;
+    display: block;
+  }
+
+  .color-chip:hover { transform: scale(1.2); }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--font-mono);
+  }
+
+  .status-item { display: flex; align-items: center; gap: 5px; }
+  .status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); }
+
+  .tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface3);
+    color: var(--text);
+    font-size: 10px;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 10;
+  }
+
+  .tb-btn:hover .tooltip,
+  .color-btn:hover .tooltip { opacity: 1; }
+
+  .stroke-swatch { border: 2px solid currentColor; background: transparent; }
+
+  select option { background: var(--surface2); }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .pane { min-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Roblox Rich Text Editor
+    <span class="logo-sub">Unknown Technologies+</span>
+  </div>
+  <div class="top-actions">
+    <button class="btn" onclick="ClearEditor()">Clear</button>
+    <button class="btn" onclick="OpenImportModal()">Import XML</button>
+    <button class="btn btn-accent" onclick="CopyOutput()">Copy XML</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="pane">
+    <div class="pane-header">
+      <span class="pane-title">Editor</span>
+      <span style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">WYSIWYG</span>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <select class="font-face-select" id="fontFaceSelect" onchange="ApplyFontFace(this.value)" title="Font Face">
+          <option value="">Font…</option>
+          <option value="GothamSSm">GothamSSm</option>
+          <option value="BuilderSans">BuilderSans</option>
+          <option value="Arial">Arial</option>
+          <option value="Highway Gothic">Highway Gothic</option>
+          <option value="Inconsolata">Inconsolata</option>
+          <option value="Oswald">Oswald</option>
+          <option value="Roboto">Roboto</option>
+          <option value="Ubuntu">Ubuntu</option>
+        </select>
+        <select class="font-size-select" id="fontSizeSelect" onchange="ApplyFontSize(this.value)" title="Font Size">
+          <option value="">Size…</option>
+          <option value="8">8</option>
+          <option value="10">10</option>
+          <option value="12">12</option>
+          <option value="14">14</option>
+          <option value="16">16</option>
+          <option value="18">18</option>
+          <option value="20">20</option>
+          <option value="24">24</option>
+          <option value="28">28</option>
+          <option value="32">32</option>
+          <option value="40">40</option>
+          <option value="48">48</option>
+          <option value="60">60</option>
+        </select>
+      </div>
+
+      <div class="toolbar-sep"></div>
+
+      <div class="toolbar-group">
+        <button class="tb-btn" data-format="b" onclick="FormatCmd('b')" title="Bold">B<span class="tooltip">Bold</span></button>
+        <button class="tb-btn" data-format="i" onclick="FormatCmd('i')" title="Italic">I<span class="tooltip">Italic</span></button>
+        <button class="tb-btn" data-format="u" onclick="FormatCmd('u')" title="Underline">U<span class="tooltip">Underline</span></button>
+        <button class="tb-btn" data-format="s" onclick="FormatCmd('s')" title="Strikethrough">S<span class="tooltip">Strikethrough</span></button>
+        <button class="tb-btn" data-format="sc" onclick="FormatCmd('sc')" title="Small Caps">SC<span class="tooltip">Small Caps</span></button>
+        <button class="tb-btn" onclick="InsertNewline()" title="Newline">↵<span class="tooltip">Newline</span></button>
+      </div>
+
+      <div class="toolbar-sep"></div>
+
+      <div class="toolbar-group">
+        <button class="color-btn" id="textColorBtn" onclick="OpenColorPicker('text', event)" title="Text Color">
+          <span class="color-swatch" id="textColorSwatch" style="background:#ffffff;"></span>
+          <span class="tooltip">Text Color</span>
+        </button>
+        <button class="color-btn" id="strokeColorBtn" onclick="OpenColorPicker('stroke', event)" title="Stroke Color">
+          <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:11px;font-weight:700;color:var(--text2);">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="12" height="12" rx="2" stroke="white" stroke-width="2.5" fill="none"/>
+            </svg>
+          </span>
+          <span class="tooltip">Stroke Color</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="editor-area" id="editor" contenteditable="true" spellcheck="false"
+      oninput="UpdateOutput()"
+      onkeyup="UpdateOutput()"
+      onmouseup="UpdateToolbarState()"
+      onkeydown="HandleKeyDown(event)">
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item"><div class="status-dot"></div> Ready</div>
+      <div class="status-item">Chars: <span id="charCount">0</span></div>
+      <div class="status-item">Tags: <span id="tagCount">0</span></div>
+    </div>
+  </div>
+
+  <div class="pane preview-pane">
+    <div class="pane-header">
+      <span class="pane-title">Output</span>
+      <span style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">LIVE</span>
+    </div>
+
+    <div class="preview-inner">
+      <div>
+        <div class="preview-label">Roblox Preview</div>
+        <div class="preview-roblox" id="robloxPreview">
+          <span style="color:#555">Your styled text will appear here…</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span class="code-block-lang">Rich Text XML</span>
+            <button class="copy-btn" id="copyXmlBtn" onclick="CopyOutput()">Copy</button>
+          </div>
+          <pre class="code-content" id="xmlOutput">Formatted XML output will appear here…</pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="code-block">
+          <div class="code-block-header">
+            <span class="code-block-lang">Roblox Luau</span>
+            <button class="copy-btn" id="copyLuaBtn" onclick="CopyLua()">Copy</button>
+          </div>
+          <pre class="code-content" id="luaOutput">Luau snippet will appear here…</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="importModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px;width:560px;max-width:94vw;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:13px;font-weight:600;letter-spacing:0.5px;">Import Rich Text XML</span>
+      <button onclick="CloseImportModal()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;">×</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);line-height:1.6;">Paste your existing Roblox rich text XML below. Tags like <code style="font-family:var(--font-mono);color:var(--teal)">&lt;b&gt;</code>, <code style="font-family:var(--font-mono);color:var(--teal)">&lt;font color=""&gt;</code>, <code style="font-family:var(--font-mono);color:var(--teal)">&lt;sc&gt;</code>, <code style="font-family:var(--font-mono);color:var(--teal)">&lt;stroke&gt;</code> etc. will be converted into editable styled text.</p>
+    <textarea id="importTextarea" spellcheck="false" style="font-family:var(--font-mono);font-size:12px;background:var(--bg);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius);padding:12px;resize:vertical;min-height:120px;outline:none;line-height:1.6;" placeholder="<b><font color=&quot;#ff0000&quot;>Hello</font></b> world!"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn" onclick="CloseImportModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="ImportXml()">Import & Edit</button>
+    </div>
+  </div>
+</div>
+
+<div class="cp-overlay" id="cpOverlay"></div>
+
+<div class="color-picker-popup" id="colorPickerPopup">
+  <div class="color-picker-title" id="colorPickerTitle">Text Color</div>
+
+  <div class="cp-sv-wrap" id="cpSvWrap">
+    <canvas id="cpSvCanvas"></canvas>
+    <div class="cp-sv-cursor" id="cpSvCursor"></div>
+  </div>
+
+  <div class="cp-hue-wrap" id="cpHueWrap">
+    <div class="cp-hue-thumb" id="cpHueThumb"></div>
+  </div>
+
+  <div class="cp-inputs">
+    <div class="cp-input-group">
+      <div class="cp-input-label">R</div>
+      <input class="cp-input" id="cpR" type="number" min="0" max="255" value="255" oninput="CpFromRgbInputs()">
+    </div>
+    <div class="cp-input-group">
+      <div class="cp-input-label">G</div>
+      <input class="cp-input" id="cpG" type="number" min="0" max="255" value="255" oninput="CpFromRgbInputs()">
+    </div>
+    <div class="cp-input-group">
+      <div class="cp-input-label">B</div>
+      <input class="cp-input" id="cpB" type="number" min="0" max="255" value="255" oninput="CpFromRgbInputs()">
+    </div>
+    <div class="cp-input-group">
+      <div class="cp-input-label">A</div>
+      <input class="cp-input" id="cpA" type="number" min="0" max="255" value="255" oninput="CpFromRgbInputs()">
+    </div>
+  </div>
+
+  <div class="cp-c3-row">
+    <span class="cp-c3-label">Color3</span>
+    <input class="cp-c3-input" id="cpC3" type="text" placeholder="1, 1, 1" oninput="CpFromC3Input()">
+  </div>
+
+  <div class="color-grid" id="colorGrid"></div>
+
+  <div class="cp-bottom">
+    <div class="cp-preview" id="cpPreview"></div>
+    <input class="cp-hex-input" id="cpHex" type="text" placeholder="#ffffff" maxlength="9" oninput="CpFromHexInput()">
+    <button class="cp-ok-btn" onclick="CpApply()">Apply</button>
+  </div>
+</div>
+
+<script>
+var EditorEl = document.getElementById('editor');
+var ColorPickerType = 'text';
+var CurrentTextColor = '#ffffff';
+var CurrentStrokeColor = '#000000';
+var SavedRange = null;
+
+var CpHsv = { h: 0, s: 0, v: 1 };
+var CpDraggingSv = false;
+var CpDraggingHue = false;
+
+var PaletteColors = [
+  '#ffffff','#f5c5c5','#f5a623','#ffe066','#a8e063',
+  '#63e0a8','#63c8e0','#b8b8ff','#e063c8','#ff6b7a',
+  '#cccccc','#e87777','#d48a1a','#c8a000','#6fb832',
+  '#1ab878','#1a9ab8','#7878e8','#b81a98','#cc2233',
+  '#999999','#b84040','#a06010','#888000','#4a8022',
+  '#128060','#126080','#5050c0','#801870','#881122',
+  '#555555','#773030','#703a08','#505000','#2d5010',
+  '#0a4a38','#0a3a4a','#303080','#4a0a44','#440a0a',
+  '#222222','#440000','#3a1e00','#222200','#102008',
+  '#001a12','#001522','#080830','#1a0022','#110000',
+  '#000000','#0d0d0d','#1a0a00','#0a0a00','#000800',
+  '#000a06','#000a10','#000008','#080010','#050000'
+];
+
+function HsvToRgb(H, S, V) {
+  var R, G, B;
+  var I = Math.floor(H * 6);
+  var F = H * 6 - I;
+  var P = V * (1 - S);
+  var Q = V * (1 - F * S);
+  var T = V * (1 - (1 - F) * S);
+  switch (I % 6) {
+    case 0: R=V; G=T; B=P; break;
+    case 1: R=Q; G=V; B=P; break;
+    case 2: R=P; G=V; B=T; break;
+    case 3: R=P; G=Q; B=V; break;
+    case 4: R=T; G=P; B=V; break;
+    case 5: R=V; G=P; B=Q; break;
+  }
+  return { r: Math.round(R*255), g: Math.round(G*255), b: Math.round(B*255) };
+}
+
+function RgbToHsv(R, G, B) {
+  R /= 255; G /= 255; B /= 255;
+  var Max = Math.max(R,G,B), Min = Math.min(R,G,B), D = Max - Min;
+  var H = 0, S = Max === 0 ? 0 : D / Max, V = Max;
+  if (D !== 0) {
+    if (Max === R) H = ((G - B) / D + (G < B ? 6 : 0)) / 6;
+    else if (Max === G) H = ((B - R) / D + 2) / 6;
+    else H = ((R - G) / D + 4) / 6;
+  }
+  return { h: H, s: S, v: V };
+}
+
+function RgbToHex(R, G, B) {
+  return '#' + [R,G,B].map(function(X) { return ('0'+X.toString(16)).slice(-2); }).join('');
+}
+
+function HexToRgb(Hex) {
+  Hex = Hex.replace('#','');
+  if (Hex.length === 3) Hex = Hex[0]+Hex[0]+Hex[1]+Hex[1]+Hex[2]+Hex[2];
+  var N = parseInt(Hex, 16);
+  return { r: (N>>16)&255, g: (N>>8)&255, b: N&255 };
+}
+
+function CpDrawSv() {
+  var Canvas = document.getElementById('cpSvCanvas');
+  var Wrap = document.getElementById('cpSvWrap');
+  Canvas.width = Wrap.offsetWidth;
+  Canvas.height = Wrap.offsetHeight;
+  var Ctx = Canvas.getContext('2d');
+  var HueRgb = HsvToRgb(CpHsv.h, 1, 1);
+  var HueStr = 'rgb(' + HueRgb.r + ',' + HueRgb.g + ',' + HueRgb.b + ')';
+  var GradH = Ctx.createLinearGradient(0, 0, Canvas.width, 0);
+  GradH.addColorStop(0, '#fff');
+  GradH.addColorStop(1, HueStr);
+  Ctx.fillStyle = GradH;
+  Ctx.fillRect(0, 0, Canvas.width, Canvas.height);
+  var GradV = Ctx.createLinearGradient(0, 0, 0, Canvas.height);
+  GradV.addColorStop(0, 'rgba(0,0,0,0)');
+  GradV.addColorStop(1, '#000');
+  Ctx.fillStyle = GradV;
+  Ctx.fillRect(0, 0, Canvas.width, Canvas.height);
+  var Cursor = document.getElementById('cpSvCursor');
+  Cursor.style.left = (CpHsv.s * Canvas.width) + 'px';
+  Cursor.style.top = ((1 - CpHsv.v) * Canvas.height) + 'px';
+}
+
+function CpUpdateHueThumb() {
+  document.getElementById('cpHueThumb').style.left = (CpHsv.h * 100) + '%';
+}
+
+function CpSyncInputs() {
+  var Rgb = HsvToRgb(CpHsv.h, CpHsv.s, CpHsv.v);
+  var A = parseInt(document.getElementById('cpA').value) || 255;
+  document.getElementById('cpR').value = Rgb.r;
+  document.getElementById('cpG').value = Rgb.g;
+  document.getElementById('cpB').value = Rgb.b;
+  var Hex = RgbToHex(Rgb.r, Rgb.g, Rgb.b);
+  document.getElementById('cpHex').value = Hex;
+  var C3R = (Rgb.r/255).toFixed(3);
+  var C3G = (Rgb.g/255).toFixed(3);
+  var C3B = (Rgb.b/255).toFixed(3);
+  document.getElementById('cpC3').value = C3R + ', ' + C3G + ', ' + C3B;
+  document.getElementById('cpPreview').style.background = Hex;
+}
+
+function CpRefresh() {
+  CpDrawSv();
+  CpUpdateHueThumb();
+  CpSyncInputs();
+}
+
+function CpFromHexInput() {
+  var Val = document.getElementById('cpHex').value.trim();
+  if (!/^#[0-9a-fA-F]{6}$/.test(Val)) return;
+  var Rgb = HexToRgb(Val);
+  var Hsv = RgbToHsv(Rgb.r, Rgb.g, Rgb.b);
+  CpHsv.h = Hsv.h; CpHsv.s = Hsv.s; CpHsv.v = Hsv.v;
+  CpRefresh();
+}
+
+function CpFromRgbInputs() {
+  var R = Math.min(255, Math.max(0, parseInt(document.getElementById('cpR').value)||0));
+  var G = Math.min(255, Math.max(0, parseInt(document.getElementById('cpG').value)||0));
+  var B = Math.min(255, Math.max(0, parseInt(document.getElementById('cpB').value)||0));
+  var Hsv = RgbToHsv(R, G, B);
+  CpHsv.h = Hsv.h; CpHsv.s = Hsv.s; CpHsv.v = Hsv.v;
+  var Hex = RgbToHex(R, G, B);
+  document.getElementById('cpHex').value = Hex;
+  var C3R = (R/255).toFixed(3), C3G = (G/255).toFixed(3), C3B = (B/255).toFixed(3);
+  document.getElementById('cpC3').value = C3R + ', ' + C3G + ', ' + C3B;
+  document.getElementById('cpPreview').style.background = Hex;
+  CpDrawSv();
+  CpUpdateHueThumb();
+}
+
+function CpFromC3Input() {
+  var Val = document.getElementById('cpC3').value.trim();
+  var Parts = Val.split(',').map(function(X) { return parseFloat(X.trim()); });
+  if (Parts.length < 3 || Parts.some(isNaN)) return;
+  var R = Math.round(Math.min(1, Math.max(0, Parts[0])) * 255);
+  var G = Math.round(Math.min(1, Math.max(0, Parts[1])) * 255);
+  var B = Math.round(Math.min(1, Math.max(0, Parts[2])) * 255);
+  var Hsv = RgbToHsv(R, G, B);
+  CpHsv.h = Hsv.h; CpHsv.s = Hsv.s; CpHsv.v = Hsv.v;
+  var Hex = RgbToHex(R, G, B);
+  document.getElementById('cpR').value = R;
+  document.getElementById('cpG').value = G;
+  document.getElementById('cpB').value = B;
+  document.getElementById('cpHex').value = Hex;
+  document.getElementById('cpPreview').style.background = Hex;
+  CpDrawSv();
+  CpUpdateHueThumb();
+}
+
+function CpSvPointer(Evt, Canvas) {
+  var Rect = Canvas.getBoundingClientRect();
+  var X = Math.min(1, Math.max(0, (Evt.clientX - Rect.left) / Rect.width));
+  var Y = Math.min(1, Math.max(0, (Evt.clientY - Rect.top) / Rect.height));
+  CpHsv.s = X;
+  CpHsv.v = 1 - Y;
+  CpRefresh();
+}
+
+function CpHuePointer(Evt) {
+  var Rect = document.getElementById('cpHueWrap').getBoundingClientRect();
+  CpHsv.h = Math.min(1, Math.max(0, (Evt.clientX - Rect.left) / Rect.width));
+  CpRefresh();
+}
+
+function CpApply() {
+  var Hex = document.getElementById('cpHex').value.trim();
+  if (!/^#[0-9a-fA-F]{6}$/.test(Hex)) Hex = '#ffffff';
+  if (ColorPickerType === 'text') {
+    CurrentTextColor = Hex;
+    document.getElementById('textColorSwatch').style.background = Hex;
+    RestoreRange();
+    ApplyColorToSelection(Hex, 'text');
+  } else {
+    CurrentStrokeColor = Hex;
+    RestoreRange();
+    ApplyColorToSelection(Hex, 'stroke');
+  }
+  CloseCp();
+  UpdateOutput();
+}
+
+function CloseCp() {
+  document.getElementById('colorPickerPopup').classList.remove('open');
+  document.getElementById('cpOverlay').classList.remove('open');
+}
+
+function BuildColorGrid() {
+  var Grid = document.getElementById('colorGrid');
+  Grid.innerHTML = '';
+  PaletteColors.forEach(function(C) {
+    var Chip = document.createElement('button');
+    Chip.className = 'color-chip';
+    Chip.style.background = C;
+    Chip.title = C;
+    Chip.onclick = function() {
+      var Rgb = HexToRgb(C);
+      var Hsv = RgbToHsv(Rgb.r, Rgb.g, Rgb.b);
+      CpHsv.h = Hsv.h; CpHsv.s = Hsv.s; CpHsv.v = Hsv.v;
+      CpRefresh();
+    };
+    Grid.appendChild(Chip);
+  });
+}
+
+function OpenColorPicker(Type, Evt) {
+  Evt.stopPropagation();
+  SaveRange();
+  ColorPickerType = Type;
+  document.getElementById('colorPickerTitle').textContent = Type === 'text' ? 'Text Color' : 'Stroke Color';
+  var Current = Type === 'text' ? CurrentTextColor : CurrentStrokeColor;
+  var Rgb = HexToRgb(Current.replace(/^#/,'').length === 6 ? Current : '#ffffff');
+  var Hsv = RgbToHsv(Rgb.r, Rgb.g, Rgb.b);
+  CpHsv.h = Hsv.h; CpHsv.s = Hsv.s; CpHsv.v = Hsv.v;
+  var Popup = document.getElementById('colorPickerPopup');
+  var Btn = Evt.currentTarget;
+  var Rect = Btn.getBoundingClientRect();
+  var Left = Rect.left;
+  var Top = Rect.bottom + 6;
+  if (Left + 292 > window.innerWidth) Left = window.innerWidth - 298;
+  if (Top + 520 > window.innerHeight) Top = Rect.top - 526;
+  Popup.style.left = Left + 'px';
+  Popup.style.top = Top + 'px';
+  Popup.classList.add('open');
+  document.getElementById('cpOverlay').classList.add('open');
+  document.getElementById('cpA').value = 255;
+  setTimeout(CpRefresh, 10);
+}
+
+document.getElementById('cpSvWrap').addEventListener('mousedown', function(E) {
+  CpDraggingSv = true;
+  CpSvPointer(E, document.getElementById('cpSvCanvas'));
+});
+
+document.getElementById('cpHueWrap').addEventListener('mousedown', function(E) {
+  CpDraggingHue = true;
+  CpHuePointer(E);
+});
+
+document.addEventListener('mousemove', function(E) {
+  if (CpDraggingSv) CpSvPointer(E, document.getElementById('cpSvCanvas'));
+  if (CpDraggingHue) CpHuePointer(E);
+});
+
+document.addEventListener('mouseup', function() {
+  CpDraggingSv = false;
+  CpDraggingHue = false;
+});
+
+document.getElementById('cpOverlay').addEventListener('click', CloseCp);
+
+function SelectPaletteColor(Color) {
+  if (ColorPickerType === 'text') {
+    CurrentTextColor = Color;
+    document.getElementById('textColorSwatch').style.background = Color;
+    RestoreRange();
+    ApplyColorToSelection(Color, 'text');
+  } else {
+    CurrentStrokeColor = Color;
+    RestoreRange();
+    ApplyColorToSelection(Color, 'stroke');
+  }
+  CloseCp();
+  UpdateOutput();
+}
+
+function ApplyColorToSelection(Color, Type) {
+  EditorEl.focus();
+  var Sel = window.getSelection();
+  if (!Sel || Sel.rangeCount === 0) return;
+  WrapSelectedText(function(Span) {
+    if (Type === 'text') Span.style.color = Color;
+    Span.dataset[Type + 'Color'] = Color;
+  });
+}
+
+function SaveRange() {
+  var Sel = window.getSelection();
+  if (Sel && Sel.rangeCount > 0) {
+    SavedRange = Sel.getRangeAt(0).cloneRange();
+  }
+}
+
+function RestoreRange() {
+  if (!SavedRange) return;
+  var Sel = window.getSelection();
+  Sel.removeAllRanges();
+  Sel.addRange(SavedRange);
+}
+
+
+function WrapSelectedText(ApplyFn) {
+  var Sel = window.getSelection();
+  if (!Sel || Sel.rangeCount === 0) return;
+  var R = Sel.getRangeAt(0);
+  if (R.collapsed) return;
+  var Contents = R.extractContents();
+  var Span = document.createElement('span');
+  Span.appendChild(Contents);
+  ApplyFn(Span);
+  R.insertNode(Span);
+  Sel.removeAllRanges();
+  var NewR = document.createRange();
+  NewR.selectNodeContents(Span);
+  Sel.addRange(NewR);
+  UpdateOutput();
+}
+
+function FormatCmd(Fmt) {
+  EditorEl.focus();
+  if (Fmt === 'b') document.execCommand('bold', false, null);
+  else if (Fmt === 'i') document.execCommand('italic', false, null);
+  else if (Fmt === 'u') document.execCommand('underline', false, null);
+  else if (Fmt === 's') document.execCommand('strikeThrough', false, null);
+  else if (Fmt === 'sc') {
+    WrapSelectedText(function(Span) { Span.dataset.smallcaps = '1'; Span.style.fontVariant = 'small-caps'; });
+  }
+  UpdateOutput();
+  UpdateToolbarState();
+}
+
+function InsertNewline() {
+  EditorEl.focus();
+  document.execCommand('insertHTML', false, '<br>');
+  UpdateOutput();
+}
+
+function ApplyFontSize(Size) {
+  if (!Size) return;
+  EditorEl.focus();
+  WrapSelectedText(function(Span) { Span.dataset.fontSize = Size; Span.style.fontSize = Size + 'px'; });
+  document.getElementById('fontSizeSelect').value = '';
+  UpdateOutput();
+}
+
+function ApplyFontFace(Face) {
+  if (!Face) return;
+  EditorEl.focus();
+  WrapSelectedText(function(Span) { Span.dataset.fontFace = Face; });
+  document.getElementById('fontFaceSelect').value = '';
+  UpdateOutput();
+}
+
+function UpdateToolbarState() {
+  ['b','i','u','s'].forEach(function(Fmt) {
+    var Btn = document.querySelector('.tb-btn[data-format="' + Fmt + '"]');
+    if (!Btn) return;
+    var CmdMap = { b: 'bold', i: 'italic', u: 'underline', s: 'strikeThrough' };
+    Btn.classList.toggle('active', document.queryCommandState(CmdMap[Fmt]));
+  });
+}
+
+function NodeToRichText(Node) {
+  if (Node.nodeType === Node.TEXT_NODE) {
+    return Node.textContent
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;');
+  }
+  if (Node.nodeName === 'BR') return '<br />';
+  if (Node.nodeName === 'DIV' || Node.nodeName === 'P') {
+    var Inner = '';
+    Node.childNodes.forEach(function(C) { Inner += NodeToRichText(C); });
+    return Inner + '<br />';
+  }
+  if (Node.nodeName === 'SPAN' || Node.nodeName === 'B' || Node.nodeName === 'STRONG'
+    || Node.nodeName === 'I' || Node.nodeName === 'EM' || Node.nodeName === 'U'
+    || Node.nodeName === 'S' || Node.nodeName === 'STRIKE') {
+    return WrapNodeTags(Node);
+  }
+  var Out = '';
+  Node.childNodes.forEach(function(C) { Out += NodeToRichText(C); });
+  return Out;
+}
+
+function WrapNodeTags(Node) {
+  var Inner = '';
+  Node.childNodes.forEach(function(C) { Inner += NodeToRichText(C); });
+
+  var OpenTags = '';
+  var CloseTags = '';
+
+  var IsBold = Node.nodeName === 'B' || Node.nodeName === 'STRONG'
+    || (Node.style && (Node.style.fontWeight === 'bold' || Node.style.fontWeight === '700'));
+  var IsItalic = Node.nodeName === 'I' || Node.nodeName === 'EM'
+    || (Node.style && Node.style.fontStyle === 'italic');
+  var IsUnder = Node.nodeName === 'U'
+    || (Node.style && Node.style.textDecoration && Node.style.textDecoration.includes('underline'));
+  var IsStrike = Node.nodeName === 'S' || Node.nodeName === 'STRIKE'
+    || (Node.style && Node.style.textDecoration && Node.style.textDecoration.includes('line-through'));
+  var IsSmallCaps = Node.dataset && Node.dataset.smallcaps === '1';
+
+  var TextColor = '';
+  if (Node.dataset && Node.dataset.textColor) TextColor = Node.dataset.textColor;
+  else if (Node.style && Node.style.color) TextColor = CssColorToHex(Node.style.color);
+
+  var StrokeColor = Node.dataset && Node.dataset.strokeColor ? Node.dataset.strokeColor : '';
+  var FontSize = Node.dataset && Node.dataset.fontSize ? Node.dataset.fontSize : '';
+  if (!FontSize && Node.style && Node.style.fontSize) {
+    FontSize = Node.style.fontSize.replace('px','');
+  }
+  var FontFace = Node.dataset && Node.dataset.fontFace ? Node.dataset.fontFace : '';
+  if (!FontFace && Node.style && Node.style.fontFamily) {
+    FontFace = Node.style.fontFamily.replace(/"/g,'').replace(/'/g,'').trim();
+  }
+
+  if (IsBold) { OpenTags += '<b>'; CloseTags = '</b>' + CloseTags; }
+  if (IsItalic) { OpenTags += '<i>'; CloseTags = '</i>' + CloseTags; }
+  if (IsUnder) { OpenTags += '<u>'; CloseTags = '</u>' + CloseTags; }
+  if (IsStrike) { OpenTags += '<s>'; CloseTags = '</s>' + CloseTags; }
+  if (IsSmallCaps) { OpenTags += '<sc>'; CloseTags = '</sc>' + CloseTags; }
+  if (FontSize) { OpenTags += '<font size="' + FontSize + '">'; CloseTags = '</font>' + CloseTags; }
+  if (FontFace) { OpenTags += '<font face="' + FontFace + '">'; CloseTags = '</font>' + CloseTags; }
+  if (TextColor) { OpenTags += '<font color="' + NormalizeHex(TextColor) + '">'; CloseTags = '</font>' + CloseTags; }
+  if (StrokeColor) { OpenTags += '<stroke color="' + NormalizeHex(StrokeColor) + '">'; CloseTags = '</stroke>' + CloseTags; }
+
+  if (!OpenTags) return Inner;
+  return OpenTags + Inner + CloseTags;
+}
+
+function CssColorToHex(Rgb) {
+  if (!Rgb || Rgb === '') return '';
+  if (Rgb.startsWith('#')) return Rgb;
+  var M = Rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+  if (!M) return Rgb;
+  return '#' + [M[1],M[2],M[3]].map(function(X) {
+    return ('0' + parseInt(X).toString(16)).slice(-2);
+  }).join('');
+}
+
+function NormalizeHex(H) {
+  if (!H) return H;
+  H = H.trim();
+  if (!H.startsWith('#')) H = '#' + H;
+  return H;
+}
+
+function UpdateOutput() {
+  var Xml = '';
+  EditorEl.childNodes.forEach(function(C) { Xml += NodeToRichText(C); });
+  Xml = Xml.replace(/(<br \/>)+$/, '').replace(/(<br\/>)+$/, '').replace(/(<br>)+$/, '');
+
+  document.getElementById('xmlOutput').textContent = Xml || '';
+
+  var LuaEscaped = Xml.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n');
+  document.getElementById('luaOutput').textContent = Xml
+    ? 'TextLabel.RichText = true\nTextLabel.Text = "' + LuaEscaped + '"'
+    : '';
+
+  RenderRobloxPreview(Xml);
+  UpdateStatusBar(Xml);
+}
+
+function RenderRobloxPreview(Xml) {
+  var Preview = document.getElementById('robloxPreview');
+  if (!Xml) {
+    Preview.innerHTML = '<span style="color:#555">Your styled text will appear here…</span>';
+    return;
+  }
+  var HtmlEquiv = Xml
+    .replace(/<b>/g, '<strong>')
+    .replace(/<\/b>/g, '</strong>')
+    .replace(/<i>/g, '<em>')
+    .replace(/<\/i>/g, '</em>')
+    .replace(/<sc>/g, '<span style="font-variant:small-caps">')
+    .replace(/<\/sc>/g, '</span>')
+    .replace(/<stroke color="([^"]+)">/g, '<span style="text-shadow:1px 1px 0 $1,-1px -1px 0 $1,1px -1px 0 $1,-1px 1px 0 $1">')
+    .replace(/<\/stroke>/g, '</span>')
+    .replace(/<font size="(\d+)">/g, '<span style="font-size:$1px">')
+    .replace(/<font face="([^"]+)">/g, '<span style="font-family:\'$1\'">')
+    .replace(/<font color="([^"]+)">/g, '<span style="color:$1">')
+    .replace(/<\/font>/g, '</span>');
+  Preview.innerHTML = HtmlEquiv;
+}
+
+function UpdateStatusBar(Xml) {
+  var PlainText = Xml.replace(/<[^>]+>/g,'');
+  document.getElementById('charCount').textContent = PlainText.length;
+  var TagMatches = Xml.match(/<[^/][^>]*>/g);
+  document.getElementById('tagCount').textContent = TagMatches ? TagMatches.length : 0;
+}
+
+function CopyOutput() {
+  var Text = document.getElementById('xmlOutput').textContent;
+  navigator.clipboard.writeText(Text).then(function() {
+    var Btn = document.getElementById('copyXmlBtn');
+    Btn.textContent = 'Copied!';
+    Btn.classList.add('copied');
+    setTimeout(function() { Btn.textContent = 'Copy'; Btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function CopyLua() {
+  var Text = document.getElementById('luaOutput').textContent;
+  navigator.clipboard.writeText(Text).then(function() {
+    var Btn = document.getElementById('copyLuaBtn');
+    Btn.textContent = 'Copied!';
+    Btn.classList.add('copied');
+    setTimeout(function() { Btn.textContent = 'Copy'; Btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function ClearEditor() {
+  EditorEl.innerHTML = '';
+  UpdateOutput();
+}
+
+function HandleKeyDown(Evt) {
+  if (Evt.key === 'Enter') {
+    Evt.preventDefault();
+    var Sel = window.getSelection();
+    if (!Sel || Sel.rangeCount === 0) return;
+    var R = Sel.getRangeAt(0);
+    R.deleteContents();
+    var Br = document.createElement('br');
+    R.insertNode(Br);
+    R.setStartAfter(Br);
+    R.collapse(true);
+    Sel.removeAllRanges();
+    Sel.addRange(R);
+    EnsureTrailingBr();
+    UpdateOutput();
+  }
+}
+
+function EnsureTrailingBr() {
+  var Last = EditorEl.lastChild;
+  if (!Last || Last.nodeName !== 'BR') {
+    EditorEl.appendChild(document.createElement('br'));
+  }
+}
+
+EditorEl.addEventListener('focus', EnsureTrailingBr);
+
+function OpenImportModal() {
+  var Overlay = document.getElementById('importModalOverlay');
+  Overlay.style.display = 'flex';
+  document.getElementById('importTextarea').value = '';
+  setTimeout(function() { document.getElementById('importTextarea').focus(); }, 50);
+}
+
+function CloseImportModal() {
+  document.getElementById('importModalOverlay').style.display = 'none';
+}
+
+function ImportXml() {
+  var Raw = document.getElementById('importTextarea').value.trim();
+  if (!Raw) return;
+  var Dom = RichTextToDom(Raw);
+  EditorEl.innerHTML = '';
+  Dom.forEach(function(Node) { EditorEl.appendChild(Node); });
+  CloseImportModal();
+  UpdateOutput();
+}
+
+function RichTextToDom(Xml) {
+  var Nodes = [];
+  var TokenRegex = /(<[^>]+>|[^<]+)/g;
+  var TagStack = [];
+  var CurrentParent = null;
+
+  function MakeContainer() {
+    return { styles: {}, datasets: {}, children: [] };
+  }
+
+  function ParseTokens(Str) {
+    var Tokens = [];
+    var M;
+    while ((M = TokenRegex.exec(Str)) !== null) {
+      Tokens.push(M[0]);
+    }
+    return Tokens;
+  }
+
+  function ProcessTokens(Tokens) {
+    var Stack = [{ styles: {}, datasets: {}, children: [] }];
+
+    Tokens.forEach(function(Token) {
+      var Top = Stack[Stack.length - 1];
+
+      if (Token === '<br />' || Token === '<br/>' || Token === '<br>') {
+        Top.children.push({ type: 'br' });
+        return;
+      }
+
+      var CloseMatch = Token.match(/^<\/(\w+)>$/);
+      if (CloseMatch) {
+        if (Stack.length > 1) Stack.pop();
+        return;
+      }
+
+      var OpenMatch = Token.match(/^<(\w+)((?:\s+[^>]*)?)>$/);
+      if (OpenMatch) {
+        var TagName = OpenMatch[1].toLowerCase();
+        var AttrsStr = OpenMatch[2];
+        var NewNode = { type: 'tag', tag: TagName, styles: Object.assign({}, Top.styles),
+          datasets: Object.assign({}, Top.datasets), children: [] };
+
+        if (TagName === 'b') NewNode.styles.fontWeight = 'bold';
+        else if (TagName === 'i') NewNode.styles.fontStyle = 'italic';
+        else if (TagName === 'u') NewNode.styles.textDecoration = (NewNode.styles.textDecoration ? NewNode.styles.textDecoration + ' ' : '') + 'underline';
+        else if (TagName === 's') NewNode.styles.textDecoration = (NewNode.styles.textDecoration ? NewNode.styles.textDecoration + ' ' : '') + 'line-through';
+        else if (TagName === 'sc') { NewNode.styles.fontVariant = 'small-caps'; NewNode.datasets.smallcaps = '1'; }
+        else if (TagName === 'font') {
+          var SizeM = AttrsStr.match(/size="([^"]+)"/);
+          var ColorM = AttrsStr.match(/color="([^"]+)"/);
+          var FaceM = AttrsStr.match(/face="([^"]+)"/);
+          if (SizeM) { NewNode.styles.fontSize = SizeM[1] + 'px'; NewNode.datasets.fontSize = SizeM[1]; }
+          if (ColorM) { NewNode.styles.color = ColorM[1]; NewNode.datasets.textColor = ColorM[1]; }
+          if (FaceM) { NewNode.datasets.fontFace = FaceM[1]; }
+        } else if (TagName === 'stroke') {
+          var SColorM = AttrsStr.match(/color="([^"]+)"/);
+          if (SColorM) { NewNode.datasets.strokeColor = SColorM[1]; }
+        }
+
+        Top.children.push(NewNode);
+        Stack.push(NewNode);
+        return;
+      }
+
+      var Text = Token
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+      Top.children.push({ type: 'text', value: Text });
+    });
+
+    return Stack[0].children;
+  }
+
+  function VirtualToDom(VNodes) {
+    var Result = [];
+    VNodes.forEach(function(V) {
+      if (V.type === 'br') {
+        Result.push(document.createElement('br'));
+        return;
+      }
+      if (V.type === 'text') {
+        Result.push(document.createTextNode(V.value));
+        return;
+      }
+      if (V.type === 'tag') {
+        if (V.children.length === 0) return;
+        var Span = document.createElement('span');
+        Object.keys(V.styles).forEach(function(Prop) { Span.style[Prop] = V.styles[Prop]; });
+        Object.keys(V.datasets).forEach(function(Key) { Span.dataset[Key] = V.datasets[Key]; });
+        var ChildDom = VirtualToDom(V.children);
+        ChildDom.forEach(function(C) { Span.appendChild(C); });
+        Result.push(Span);
+      }
+    });
+    return Result;
+  }
+
+  var Tokens = ParseTokens(Xml);
+  var VTree = ProcessTokens(Tokens);
+  return VirtualToDom(VTree);
+}
+
+BuildColorGrid();
+</script>
+</body>
+</html>

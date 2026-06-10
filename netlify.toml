@@ -1,0 +1,5 @@
+[[redirects]]
+from = "https://unknown-technologies.netlify.app/*"
+to = "https://unknown-technologies.us/:splat"
+status = 301
+force = true
