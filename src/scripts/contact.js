@@ -3,7 +3,7 @@
   var btn = form.querySelector('[type="submit"]');
   var status = document.getElementById('ct-status');
 
-  fetch('https://api.unknown-technologies.us/', { method: 'GET', cache: 'no-store' })
+  fetch('https://api.unknown-technologies.net/', { method: 'GET', cache: 'no-store' })
     .then(function (r) { if (!r.ok) throw new Error(); })
     .catch(function () {
       btn.disabled = true;
@@ -23,7 +23,7 @@
     var origHTML = btn.innerHTML;
     btn.disabled = true;
     btn.textContent = 'Sending\u2026';
-    fetch('https://api.unknown-technologies.us/web/contact', {
+    fetch('https://api.unknown-technologies.net/web/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

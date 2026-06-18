@@ -3,7 +3,7 @@
   var btn = form.querySelector('[type="submit"]');
   var status = document.getElementById('aff-status');
 
-  fetch('https://api.unknown-technologies.us/', { method: 'GET', cache: 'no-store' })
+  fetch('https://api.unknown-technologies.net/', { method: 'GET', cache: 'no-store' })
     .then(function (r) { if (!r.ok) throw new Error(); })
     .catch(function () {
       btn.disabled = true;
@@ -23,7 +23,7 @@
     var origHTML = btn.innerHTML;
     btn.disabled = true;
     btn.textContent = 'Submitting\u2026';
-    fetch('https://api.unknown-technologies.us/web/affiliate_request', {
+    fetch('https://api.unknown-technologies.net/web/affiliate_request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
