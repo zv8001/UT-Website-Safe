@@ -1,4 +1,4 @@
-const BackendBaseUrl = "https://api.unknown-technologies.us/status_api";
+const BackendBaseUrl = "https://api.unknown-technologies.net/status_api";
 const PollIntervalMs = 5000;
 
 function NodeSlug(Name) {

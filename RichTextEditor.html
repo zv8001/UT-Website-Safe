@@ -40,6 +40,42 @@
     flex-direction: column;
   }
 
+  .DomainWarning {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(90deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%);
+    color: #fff7ed;
+    border-bottom: 2px solid #fecaca;
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.35);
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .DomainWarning a {
+    color: #ffffff;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+
+  .DomainWarningMarker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #b91c1c;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
   .top-bar {
     display: flex;
     align-items: center;
@@ -614,6 +650,11 @@
 </style>
 </head>
 <body>
+
+<div class="DomainWarning" role="alert">
+  <span class="DomainWarningMarker">!</span>
+  <span><strong>Important domain notice:</strong> http://unknown-technologies.us/ is no longer owned or maintained by Unknown Technologies. All official routes use <a href="https://unknown-technologies.net/">https://unknown-technologies.net/</a></span>
+</div>
 
 <div class="top-bar">
   <div class="logo">

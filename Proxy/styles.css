@@ -26,6 +26,45 @@ body {
     min-height: 100vh;
 }
 
+.DomainWarning {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(90deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%);
+    color: #fff7ed;
+    border-bottom: 2px solid #fecaca;
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.35);
+    font-weight: 800;
+    text-align: center;
+}
+
+.DomainWarning a {
+    color: #ffffff;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.DomainWarningMarker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: #fff7ed;
+    color: #b91c1c;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+}
+
 .Page {
     max-width: 860px;
     margin: 0 auto;
