@@ -1,39 +1,4 @@
 (function () {
-  document.addEventListener('DOMContentLoaded', function() {
-    if (document.querySelector('.domain-warning-banner')) return;
-
-    const Banner = document.createElement('div');
-    Banner.className = 'domain-warning-banner';
-    Banner.setAttribute('role', 'alert');
-    Banner.setAttribute('aria-live', 'polite');
-
-    const Marker = document.createElement('span');
-    Marker.className = 'domain-warning-marker';
-    Marker.setAttribute('aria-hidden', 'true');
-    Marker.textContent = '!';
-
-    const Message = document.createElement('span');
-
-    const WarningLead = document.createElement('strong');
-    WarningLead.textContent = 'Important domain notice: ';
-
-    const OldDomain = document.createElement('span');
-    OldDomain.textContent = 'http://unknown-technologies.us/';
-
-    const MiddleText = document.createTextNode(' is no longer owned or maintained by Unknown Technologies. All official routes use ');
-
-    const OfficialLink = document.createElement('a');
-    OfficialLink.href = 'https://unknown-technologies.net/';
-    OfficialLink.textContent = 'https://unknown-technologies.net/';
-    OfficialLink.rel = 'noopener noreferrer';
-
-    Message.append(WarningLead, OldDomain, MiddleText, OfficialLink);
-    Banner.append(Marker, Message);
-    document.body.prepend(Banner);
-  });
-})();
-
-(function () {
   const links = document.querySelectorAll('.navbar-links a');
   const current = location.pathname.split('/').pop() || 'index.html';
   links.forEach(function (a) {
