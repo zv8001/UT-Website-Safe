@@ -388,8 +388,6 @@
   .h-row { flex-direction: column; align-items: stretch; }
 }
 
-/* ─── Hierarchy v2 (hc-*) ─── */
-
 .hc-layout {
   display: grid;
   grid-template-columns: 1fr 185px;
@@ -407,7 +405,7 @@
   gap: 0;
 }
 
-/* Employees top box */
+
 .hc-emp-wrap { display: flex; justify-content: center; }
 
 .hc-emp-box {
@@ -432,7 +430,7 @@
 
 .hc-emp-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.1rem; }
 
-/* Connector label rows */
+
 .hc-conn-row {
   display: flex;
   justify-content: space-around;
@@ -455,7 +453,7 @@
 .hc-conn-dr::before { content: none; }
 .hc-conn-dr::after { content: ' ↘'; }
 
-/* Trial roles dashed border */
+
 .hc-trial-box {
   display: flex;
   gap: 0.6rem;
@@ -465,20 +463,20 @@
   padding: 0.55rem;
 }
 
-/* Dual row (two nodes side by side) */
+
 .hc-dual-row {
   display: flex;
   gap: 0.6rem;
   align-items: stretch;
 }
 
-/* Single centered node row */
+
 .hc-single-row { display: flex; justify-content: center; }
 
-/* Gap spacer between management and founder */
+
 .hc-cross-gap { flex: 0.25; flex-shrink: 0; }
 
-/* Role card */
+
 .hc-role {
   flex: 1;
   border-radius: 8px;
@@ -496,7 +494,7 @@
 
 .hc-rm { font-size: 0.66rem; color: var(--text-dim); }
 
-/* Role color variants */
+
 .hc-r-mod { border-color: rgba(248,113,113,0.28); }
 .hc-r-mod .hc-rn { color: #f87171; }
 
@@ -511,7 +509,7 @@
 .hc-r-founder { border-color: rgba(251,191,36,0.28); }
 .hc-r-founder .hc-rn { color: #fbbf24; }
 
-/* Cross-path connector between mod and dev */
+
 .hc-cross {
   display: flex;
   flex-direction: column;
@@ -549,7 +547,7 @@
   white-space: nowrap;
 }
 
-/* Equal power connector between Management and Founder */
+
 .hc-equal {
   display: flex;
   flex-direction: column;
@@ -597,7 +595,7 @@
   white-space: nowrap;
 }
 
-/* Staff Team label at bottom */
+
 .hc-team-label {
   text-align: center;
   font-size: 0.67rem;
@@ -608,7 +606,7 @@
   border-top: 1px dashed rgba(99,160,255,0.14);
 }
 
-/* ─── Side column (special roles) ─── */
+
 .hc-side {
   display: flex;
   flex-direction: column;
