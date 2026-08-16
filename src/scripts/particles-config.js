@@ -102,7 +102,6 @@
   }
 
   window.addEventListener("resize", scheduleResize);
-  window.addEventListener("load", scheduleResize);
 
   resize();
   requestAnimationFrame(step);
