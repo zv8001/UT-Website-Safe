@@ -18,10 +18,23 @@
     return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
   }
 
+  const MAX_DIM = 8000;
+
   function resize() {
     const rect = container.getBoundingClientRect();
-    width = Math.max(rect.width, window.innerWidth);
-    height = Math.max(rect.height, document.documentElement.scrollHeight, window.innerHeight);
+    const nextWidth = Math.min(Math.max(rect.width, window.innerWidth), MAX_DIM);
+    const nextHeight = Math.min(
+      Math.max(rect.height, document.documentElement.scrollHeight, window.innerHeight),
+      MAX_DIM
+    );
+
+
+    if (width && Math.abs(nextWidth - width) < 2 && Math.abs(nextHeight - height) < 2) {
+      return;
+    }
+
+    width = nextWidth;
+    height = nextHeight;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = width * dpr;
     canvas.height = height * dpr;
@@ -89,10 +102,9 @@
   }
 
   window.addEventListener("resize", scheduleResize);
-  if (window.ResizeObserver) {
-    new ResizeObserver(scheduleResize).observe(document.body);
-  }
   window.addEventListener("load", scheduleResize);
+  setTimeout(scheduleResize, 1000);
+  setTimeout(scheduleResize, 3000);
 
   resize();
   requestAnimationFrame(step);
