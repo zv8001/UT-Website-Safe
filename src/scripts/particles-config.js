@@ -103,8 +103,6 @@
 
   window.addEventListener("resize", scheduleResize);
   window.addEventListener("load", scheduleResize);
-  setTimeout(scheduleResize, 1000);
-  setTimeout(scheduleResize, 3000);
 
   resize();
   requestAnimationFrame(step);
