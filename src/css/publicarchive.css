@@ -8,7 +8,6 @@ header.navbar { height: 60px !important; }
   gap: 0.75rem;
 }
 
-/* Reminder: copy to add a new archive entry!!!! -vex */
 .archive-entry {
   display: flex;
   align-items: center;
@@ -83,7 +82,6 @@ header.navbar { height: 60px !important; }
 
 .allegations-warning svg { width: 14px; height: 14px; stroke: #f87171; flex-shrink: 0; }
 
-/* Reminder: copy to add a new archive(allegation) entry!!!! -vex */
 .archive-entry.allegation {
   border-color: rgba(239,68,68,0.35);
   background: rgba(239,68,68,0.04);

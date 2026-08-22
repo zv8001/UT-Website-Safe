@@ -43,10 +43,6 @@ function FmtDuration(Seconds) {
     const m = Math.floor((Seconds % 3600) / 60);
     return h + "h " + m + "m";
 }
-
-// ── Day detail panel ─────────────────────────────────────────────────────────
-
-// Track which panel is open: { rowId, date }
 let _OpenPanel = null;
 
 function CloseDayPanel() {
@@ -58,7 +54,6 @@ function CloseDayPanel() {
             Panel.classList.remove("DayPanelOpen");
             setTimeout(() => Panel.remove(), 280);
         }
-        // Deselect bar
         Row.querySelectorAll(".Bar.BarSelected").forEach(b => b.classList.remove("BarSelected"));
     }
     _OpenPanel = null;
@@ -66,31 +61,20 @@ function CloseDayPanel() {
 
 async function OpenDayPanel(NodeSlug, Date, BarEl, RowEl) {
     const RowId = RowEl.id;
-
-    // Toggle: clicking the same bar closes it
     if (_OpenPanel && _OpenPanel.rowId === RowId && _OpenPanel.date === Date) {
         CloseDayPanel();
         return;
     }
-
-    // Close any other open panel first
     CloseDayPanel();
 
     _OpenPanel = { rowId: RowId, date: Date };
     BarEl.classList.add("BarSelected");
-
-    // Insert panel placeholder immediately (shows loading state)
     let Panel = document.createElement("div");
     Panel.className = "DayPanel";
     Panel.innerHTML = '<div class="DayPanelLoading">Loading ' + Date + '…</div>';
-
-    // Insert before the RowSep so it sits inside the row visually
     const Sep = RowEl.querySelector(".RowSep");
     RowEl.insertBefore(Panel, Sep || null);
-    // Trigger open animation
     requestAnimationFrame(() => Panel.classList.add("DayPanelOpen"));
-
-    // Fetch detail
     try {
         const Res = await fetch(BackendBaseUrl + "/api/day/" + NodeSlug + "/" + Date, {
             cache: "no-store",
@@ -141,8 +125,6 @@ function RenderDayPanel(Panel, Data, Date) {
     Panel.innerHTML = Html;
 }
 
-// ── Row builder ──────────────────────────────────────────────────────────────
-
 function BuildOrUpdateRow(Node, Container) {
     const Slug = Node.Slug || NodeSlug(Node.Name);
     let Row = document.getElementById("Row-" + Slug);
@@ -159,8 +141,6 @@ function BuildOrUpdateRow(Node, Container) {
         Row.id = "Row-" + Slug;
         Container.appendChild(Row);
     }
-
-    // Header
     let Header = Row.querySelector(".RowHeader");
     if (!Header) {
         Header = document.createElement("div");
@@ -174,8 +154,6 @@ function BuildOrUpdateRow(Node, Container) {
             (Node.Description ? '<span class="NodeDesc">' + Node.Description + '</span>' : '') +
         '</div>' +
         '<div class="UptimePct ' + StatusClass + '">' + UptimeText + '</div>';
-
-    // Bar strip
     let BarWrap = Row.querySelector(".BarWrap");
     if (!BarWrap) {
         BarWrap = document.createElement("div");
@@ -195,7 +173,6 @@ function BuildOrUpdateRow(Node, Container) {
 
         if (Entry.state !== "nodata") {
             Bar.style.cursor = "pointer";
-            // Capture values in closure
             (function(barEl, slug, date, rowEl) {
                 barEl.addEventListener("click", function(e) {
                     e.stopPropagation();
@@ -206,8 +183,6 @@ function BuildOrUpdateRow(Node, Container) {
 
         BarWrap.appendChild(Bar);
     }
-
-    // Timeline labels
     let Labels = Row.querySelector(".TimeLabels");
     if (!Labels) {
         Labels = document.createElement("div");
@@ -215,8 +190,6 @@ function BuildOrUpdateRow(Node, Container) {
         Labels.innerHTML = '<span>‹ 90 DAYS AGO</span><span>TODAY</span>';
         Row.appendChild(Labels);
     }
-
-    // Separator
     let Sep = Row.querySelector(".RowSep");
     if (!Sep) {
         Sep = document.createElement("div");
@@ -224,8 +197,6 @@ function BuildOrUpdateRow(Node, Container) {
         Row.appendChild(Sep);
     }
 }
-
-// ── Main poll loop ───────────────────────────────────────────────────────────
 
 async function FetchAndRender() {
     try {
@@ -299,8 +270,6 @@ async function FetchAndRender() {
         SetBanner("⚠ Status Unknown", "Backend cannot be queried. All node statuses are unknown.", true);
     }
 }
-
-// Close any open panel if user clicks outside a row
 document.addEventListener("click", function(e) {
     if (_OpenPanel && !e.target.closest(".Row")) {
         CloseDayPanel();

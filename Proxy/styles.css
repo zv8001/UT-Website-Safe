@@ -32,7 +32,6 @@ body {
     padding: 48px 24px 64px;
 }
 
-/* ── Header ── */
 .Header {
     display: flex;
     align-items: flex-end;
@@ -57,7 +56,6 @@ body {
     margin-top: 4px;
 }
 
-/* ── Banner ── */
 .Banner {
     display: flex;
     align-items: center;
@@ -80,7 +78,6 @@ body {
     color: rgba(255,255,255,0.65);
 }
 
-/* ── Node rows ── */
 .NodeList {
     display: flex;
     flex-direction: column;
@@ -115,7 +112,6 @@ body {
     flex-wrap: wrap;
 }
 
-/* Status dot */
 .Dot {
     width: 9px;
     height: 9px;
@@ -128,7 +124,6 @@ body {
 .dot-down  { background: var(--DotDown); box-shadow: 0 0 6px var(--DotDown); }
 .dot-unknown { background: var(--DotUnk); }
 
-/* Pulse animation on the dot when up */
 .dot-up::after {
     content: '';
     position: absolute;
@@ -159,7 +154,6 @@ body {
     padding-left: 4px;
 }
 
-/* Uptime percentage */
 .UptimePct {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
@@ -171,7 +165,6 @@ body {
 .status-down    { color: var(--DotDown); }
 .status-unknown { color: var(--DotUnk); }
 
-/* ── Bar strip ── */
 .BarWrap {
     display: flex;
     gap: 2px;
@@ -194,7 +187,6 @@ body {
     transform-origin: bottom;
 }
 
-/* Timeline labels */
 .TimeLabels {
     display: flex;
     justify-content: space-between;
@@ -206,7 +198,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Error fallback */
 .ErrorMsg {
     font-size: 13px;
     color: var(--Muted);
@@ -221,7 +212,6 @@ body {
     .BarWrap { height: 28px; }
 }
 
-/* ── Clickable bar states ── */
 .Bar { transition: opacity 0.12s, transform 0.12s, outline 0.1s; }
 .Bar[style*="cursor"]:hover { opacity: 0.80; transform: scaleY(1.10); transform-origin: bottom; }
 .Bar.BarSelected {
@@ -232,7 +222,6 @@ body {
     transform-origin: bottom;
 }
 
-/* ── Day detail panel ── */
 .DayPanel {
     overflow: hidden;
     max-height: 0;
@@ -302,7 +291,6 @@ body {
 }
 .DayPanelClose:hover { color: var(--Text); background: rgba(255,255,255,0.08); }
 
-/* ── Span list ── */
 .SpanList {
     background: var(--Surface);
     border: 1px solid var(--Border);
