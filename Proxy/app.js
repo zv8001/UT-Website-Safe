@@ -169,7 +169,7 @@ function BuildOrUpdateRow(Node, Container) {
         Bar.style.background = GetBarColor(Entry.state);
 
         const StateLabel = { up: "Operational", degraded: "Degraded", down: "Outage", nodata: "No data" }[Entry.state] || "Unknown";
-        Bar.title = Entry.date + "  •  " + StateLabel + (Entry.state !== "nodata" ? "  —  click for details" : "");
+        Bar.title = Entry.date + "  •  " + StateLabel + (Entry.state !== "nodata" ? "  -  click for details" : "");
 
         if (Entry.state !== "nodata") {
             Bar.style.cursor = "pointer";
@@ -230,7 +230,7 @@ async function FetchAndRender() {
         const BackendStaleDead = HeartbeatAge > StaleAfterSeconds;
 
         if (BackendStaleDead) {
-            SetLastUpdated("Backend heartbeat stale — polling loop may be dead");
+            SetLastUpdated("Backend heartbeat stale - polling loop may be dead");
             for (const Card of Container.querySelectorAll(".Row")) {
                 const Header = Card.querySelector(".RowHeader");
                 if (Header) {
